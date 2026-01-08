@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DawnMate - Votre Réveil Automatisé</title>
+    <img src="userlogo.jpg" alt="Logo utilisateur" style="width:100px; display:block; margin-left:auto;">
+
+    <style>
+        :root {
+            --bg-dark: #000000;  
+            --text-dark: #ffffff; 
+            --card-dark: #1a1a1a; 
+            --bg-light: #ffffff;  
+            --text-light: #000000; 
+            --card-light: #f0f0f0; 
+            --primary-color: #000000; 
+            --confirm-color: #00a651; 
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+
+        body.light {
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        body.light .scenario {
+            background-color: var(--card-light);
+            color: var(--text-light);
+            border: 1px solid #ddd;
+        }
+
+        body.dark {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        body.dark .scenario {
+            background-color: var(--card-dark);
+            color: var(--text-dark);
+            border: 1px solid #333;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        h1 {
+            margin: 0;
+            padding-bottom: 20px;
+            padding-top: 10px;
+            font-size: 50px;
+            color: inherit; 
+        }
+
+        .theme-toggle {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: inherit;
+        }
+
+        .time-display {
+            text-align: center;
+            font-size: 3.5rem;
+            margin: 3px 0;
+            font-weight: bold;
+            color: inherit; 
+        }
+
+        .date-display {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            opacity: 0.8;
+            color: inherit; 
+        }
+
+        .scenarios-container {
+            display: flex;
+            gap: 15px;
+            height: 60vh; 
+            padding: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 80px; 
+        }
+
+        .scenario {
+            width: 250px;
+            height: 300px;
+            border-radius: 10px;
+            padding: 15px;
+            padding-top: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .scenario.selected {
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .scenario h2 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid;
+            text-align: center;
+            color: inherit;
+        }
+
+        .scenario-content {
+            flex-grow: 1;
+        }
+
+        .scenario ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        .scenario li {
+            margin-bottom: 8px;
+            color: inherit; 
+        }
+
+        .scenario p {
+            margin: 5px 0;
+            color: inherit; 
+        }
+
+        .select-btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: auto;
+            padding-top: 10px;
+        }
+
+        .select-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .select-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .confirm-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 35px;
+            background-color: var(--confirm-color);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+            display: none;
+            transition: all 0.3s ease;
+            z-index: 100; 
+        }
+
+        .confirm-btn:hover {
+            opacity: 0.9;
+            transform: translateX(-50%) translateY(-2px);
+        }
+    </style>
+</head>
+<body class="light">
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    
+    <div class="header">
+        <h1>DawnMate - Votre Réveil Automatisé</h1>
+    </div>
+
+    <div class="time-display" id="timeDisplay"></div>
+    <div class="date-display" id="dateDisplay"></div>
+
+    <div class="scenarios-container">
+        <div class="scenario" id="matinSemaine">
+            <h2>Matin Semaine</h2>
+            <div class="scenario-content">
+                <p><strong>Récurrence :</strong> Lundi au Vendredi</p>
+                <p><strong>Horaire :</strong> 6:30</p>
+                <p><strong>Actions :</strong></p>
+                <ul>
+                    <li>Réveil</li>
+                    <li>Ouvrir Volet</li>
+                    <li>Allumer eau douche</li>
+                    <li>Allumer cafetière</li>
+                </ul>
+            </div>
+            <div class="select-btn-container">
+                <button class="select-btn" onclick="selectScenario('matinSemaine')">Sélectionner</button>
+            </div>
+        </div>
+
+        <div class="scenario" id="matinWeekend">
+            <h2>Matin Week-End</h2>
+            <div class="scenario-content">
+                <p><strong>Récurrence :</strong> Samedi et Dimanche</p>
+                <p><strong>Horaire :</strong> 9:00</p>
+                <p><strong>Actions :</strong></p>
+                <ul>
+                    <li>Réveil</li>
+                    <li>Ouvrir Volet</li>
+                    <li>Allumer eau douche</li>
+                    <li>Allumer cafetière</li>
+                </ul>
+            </div>
+            <div class="select-btn-container">
+                <button class="select-btn" onclick="selectScenario('matinWeekend')">Sélectionner</button>
+            </div>
+        </div>
+
+        <div class="scenario" id="matinVacances">
+            <h2>Matin Vacances</h2>
+            <div class="scenario-content">
+                <p><strong>Récurrence :</strong> Tous les jours</p>
+                <p><strong>Horaire :</strong> 10:00</p>
+                <p><strong>Actions :</strong></p>
+                <ul>
+                    <li>Réveil</li>
+		    <li>Ouvrir Volet</li>
+                    <li>Allumer eau douche</li>
+                    <li>Allumer cafetière</li>
+                </ul>
+            </div>
+            <div class="select-btn-container">
+                <button class="select-btn" onclick="selectScenario('matinVacances')">Sélectionner</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="confirm-btn" id="confirmBtn">Confirmer la sélection</button>
+    
+    
+
+    
+    
+    <script>
+       function toggleTheme() {
+    const body = document.body;
+    const themeBtn = document.querySelector('.theme-toggle');
+    
+    if (body.classList.contains('light')) {
+        body.classList.remove('light');
+        body.classList.add('dark');
+        themeBtn.textContent = '☀️';
+    } else {
+        body.classList.remove('dark');
+        body.classList.add('light');
+        themeBtn.textContent = '🌙';
+    }
+}
+
+//Sélection du boton
+let selectedScenario = null;
+
+function selectScenario(scenarioId) {
+    document.querySelectorAll('.scenario').forEach(scenario => {
+        scenario.classList.remove('selected');
+    });
+    
+    selectedScenario = scenarioId;
+    document.getElementById('confirmBtn').style.display = 'block';
+}
+
+//Confirmation de las selection du scenario
+document.getElementById('confirmBtn').addEventListener('click', function () {
+    if (!selectedScenario) return;
+
+    const scenarioCard = document.getElementById(selectedScenario);
+    const scenarioName = selectedScenario === 'matinSemaine' ? 'semaine' :
+                         selectedScenario === 'matinWeekend' ? 'weekend' :
+                         selectedScenario === 'matinVacances' ? 'vacances' : '';
+
+    const redirectPage = selectedScenario === 'matinSemaine' ? 'scenario1.html' :
+                         selectedScenario === 'matinWeekend' ? 'scenario2.html' :
+                         selectedScenario === 'matinVacances' ? 'scenario3.html' : '';
+
+    const horaireMatch = scenarioCard.innerText.match(/Horaire\s*:\s*([0-9]{1,2}:[0-9]{2})/);
+    if (!horaireMatch) return;
+
+    const heure = horaireMatch[1];
+
+    //planif du script
+    fetch('planifierScenario.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'scenario=' + encodeURIComponent(scenarioName) + '&heure=' + encodeURIComponent(heure)
+    });
+
+    //piface
+    fetch('pifaceScenario.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'scenario=' + encodeURIComponent(scenarioName)
+    });
+    
+    //historique des derniers scenarios utilises (ne fonctionne pas tres bien a voir avec la BD)
+    fetch('historique.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id_scenario=' + encodeURIComponent(
+            selectedScenario === 'matinSemaine' ? 1 :
+            selectedScenario === 'matinWeekend' ? 2 : 3
+        )
+    });
+
+    //redirection vers la page de confirmation
+    window.location.href = redirectPage;
+});
+
+
+
+// Mise à jour de l'heure et de la date
+function updateTime() {
+    fetch('date.php')
+        .then(response => response.json())
+        .then(data => {
+            const timeDisplay = document.getElementById('timeDisplay');
+            const dateDisplay = document.getElementById('dateDisplay');
+
+            timeDisplay.textContent = data.time;
+            dateDisplay.textContent = data.date;
+        })
+        .catch(error => {
+            console.error('Erreur lors de la récupération de la date/heure:', error);
+        });
+}
+
+// appel a la fonction du temps
+updateTime(); 
+setInterval(updateTime, 60000);
+
+// charger l'historique des scripts/scenario
+function chargerHistorique() {
+    fetch('historique.php')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.querySelector('#historique-table tbody');
+            tbody.innerHTML = '';
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.nom_scenario}</td>
+                    <td>${row.date_execution}</td>
+                    <td>${row.statut_execution}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+chargerHistorique();
+
+
+    </script>
+
+    <div id="historique-container" style="margin-top: 40px;">
+        <h2>Historique des scénarios</h2>
+        <table id="historique-table" border="1" style="width:100%; text-align:center;">
+            <thead>
+                <tr>
+                    <th>Nom du Scénario</th>
+                    <th>Date Exécution</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</body>
+</html>
